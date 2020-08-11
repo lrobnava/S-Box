@@ -192,14 +192,6 @@ public class Representation {
         this.nshift = nshift;
     }
 
-    public int[][] getTruthtable() {
-        return truthtable;
-    }
-
-    public void setTruthtable(int[][] truthtable) {
-        this.truthtable = truthtable;
-    }
-
     public int[] getInput() {
         return input;
     }

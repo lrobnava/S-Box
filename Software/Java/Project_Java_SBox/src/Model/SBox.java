@@ -122,6 +122,14 @@ public class SBox {
         System.out.println("Absolute Indicador: " + calculator.calculateAbsoluteIndicator(sboxobj));
         System.out.println("Sum Of Square Indicator: " + calculator.calculateSumOfSquareIndicator(sboxobj));
         System.out.println("Algebraic Degree: " + calculator.calculateAlgebraicDegree(sboxobj));
+        System.out.println("Algebraic Immunity " + calculator.calculateAlgebraicImmunity(sboxobj));
+        System.out.println("Propagation Characterics: " + calculator.calculatePropagationCharacteristics(sboxobj));
+        System.out.println("Fixed Points: " + calculator.calculateNumFixedPoints(sboxobj));
+        System.out.println("Opposite Fixed Points: " + calculator.calculateNumOppositeFixedPoints(sboxobj));
+        System.out.println("Confusion coefficient variance: " +  calculator.calculateComputeKappaCPA(m, n, m, sboxobj));
+        System.out.println("SNR (DPA) (F): " + calculator.calculateSNR_DPA(sboxobj));
+        System.out.println("Delta uniformity: " + calculator.calculateDeltaUniformity(sboxobj));
+        System.out.println("Robustness: " + calculator.calculateRobustness(sboxobj));
     }
     
 }
