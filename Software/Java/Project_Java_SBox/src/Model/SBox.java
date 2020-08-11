@@ -129,7 +129,12 @@ public class SBox {
         System.out.println("Confusion coefficient variance: " +  calculator.calculateComputeKappaCPA(m, n, m, sboxobj));
         System.out.println("SNR (DPA) (F): " + calculator.calculateSNR_DPA(sboxobj));
         System.out.println("Delta uniformity: " + calculator.calculateDeltaUniformity(sboxobj));
-        System.out.println("Robustness: " + calculator.calculateRobustness(sboxobj));
+        System.out.println("Robustness to Differential Cryptanalysis: " + calculator.calculateRobustness(sboxobj));
+        System.out.println("Trasnparency: " + calculator.calculateTransparency(sboxobj));
+        if(calculator.calculatePropagationCharacteristics(sboxobj) == 1)
+            System.out.println("Strict Avalanche Criterion is satisfaced.");
+        else
+            System.out.println("Strict Avalanche Criterion is not satisfaced.");
     }
     
 }

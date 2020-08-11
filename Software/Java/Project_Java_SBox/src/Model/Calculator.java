@@ -11,7 +11,7 @@ package Model;
  */
 public class Calculator {
     
-    public void calculateRepresentationSBox(SBox sbox){
+    public void calculateRepresentationSBox(SBox sbox) {
         
         int n = sbox.getN();
         int m = sbox.getM();
@@ -26,86 +26,98 @@ public class Calculator {
         representation.calculateAutocorrelationFast();
         sbox.setRepresentation(representation);
         calculateHammingWeights(sbox);
+        
     }
     
-    public int calculateNonLinearity (SBox sbox){
+    public int calculateNonLinearity (SBox sbox) {
         
-        int  i, j, rows, columns, value = 0, temp = 0, min = Integer.MAX_VALUE;
+        int  i, j; 
+        int rows, columns, mshift; 
+        int temp = 0, min = Integer.MAX_VALUE;
+        int walshtransformation[][], components[];
         
+        Representation represention = sbox.getRepresentation();
         rows = 1 << sbox.getM();
         columns = 1 << sbox.getN() - 1;
         
-        Representation represention = sbox.getRepresentation();
+        mshift = rows;
+        walshtransformation = represention.getWalshtransform();
+        components = new int[columns];
         
-        int mshift = rows;
-        int walshtransformation[][] = represention.getWalshtransform();
-        
-        int components[] = new int[columns];
-        
-        for (int k = 0; k < columns; k++) {
+        for (int k = 0; k < columns; k++) 
             components[k] = 0;
-        }
         
-        for (j = 0; j < columns; j++){
-                if (walshtransformation[0][j] < 0)
-                    temp = walshtransformation[0][j] * (-1);
-                
-                for (i = 1; i < rows; i++){
-                    if (Math.abs(walshtransformation[i][j]) > temp)
-                            temp = Math.abs(walshtransformation[i][j]);
-                }
-                
-                components[j] = (mshift - temp) >> 1;
-                
-                if (components[j] < min){
-                    min = components[j];
-                }
+        for (j = 0; j < columns; j++) {
+
+            if (walshtransformation[0][j] < 0)
+                temp = walshtransformation[0][j] * (-1);
+
+            for (i = 1; i < rows; i++) {
+                if (Math.abs(walshtransformation[i][j]) > temp)
+                    temp = Math.abs(walshtransformation[i][j]);
+            }
+
+            components[j] = (mshift - temp) >> 1;
+
+            if (components[j] < min)
+                min = components[j];
+
         }
+
         sbox.setNonlinearity(min);
         return min;
+
     }  
     
-    public void calculateHammingWeights(SBox sbox){
+    public void calculateHammingWeights(SBox sbox) {
+        
         int m = sbox.getM();
         int mshift = 1 << m;
         int hamming[] = new int[mshift];
-        for(int i = 0; i < mshift; i++){
-		hamming[i] = calculateHammingWeight(i);            
-        }
+        
+        for(int i = 0; i < mshift; i++)
+            hamming[i] = calculateHammingWeight(i);            
+
         sbox.setHammingweight(hamming);
+    
     }
     
-    public int calculateHammingWeight(int x){
+    public int calculateHammingWeight(int x) {
+
         int res;
+
         for (res = 0; x > 0; x = x >> 1)
             res = res + (x & 0x01);
+
         return res;
+
     }
     
-    public int calculateCorrelationImmunity(SBox sbox){
-        int  i, j, columns, order, rows, min = Integer.MAX_VALUE;
-        int m =  sbox.getM();
-        int n = sbox.getN();
+    public int calculateCorrelationImmunity(SBox sbox) {
+        
+        int  i, j, columns, order, rows;
+        int min = Integer.MAX_VALUE, m =  sbox.getM(), n = sbox.getN();
+        int hamming[], components[];
+        int walshtransform[][];
+        Representation representation = sbox.getRepresentation();
+        
         columns = 1 << n - 1;
         rows = 1 << m;
-        int components[] = new int[columns];
         
-        Representation representation = sbox.getRepresentation();
-        int walshtransform[][];
+        components = new int[columns];
         walshtransform = representation.getWalshtransform();
+        hamming = sbox.getHammingweight();
         
-        int hamming[] = sbox.getHammingweight();
-        
-        for (j = 0; j < columns; j++){
+        for (j = 0; j < columns; j++) {
             order = 1;
-            for (i = 1; i < rows; i++){
+            for (i = 1; i < rows; i++) {
                 if (order == hamming[i] && walshtransform[i][j] != 0){
-                        components[j] = order - 1;
-                        break;
+                    components[j] = order - 1;
+                    break;
                 }
-                if (i == (rows - 1) && order <= m){
-                        i = 1;
-                        order++;
+                if (i == (rows - 1) && order <= m) {
+                    i = 1;
+                    order++;
                 }
                 components[j] = order - 2;
             }
@@ -116,150 +128,172 @@ public class Calculator {
     }    
     
     public int calculateAbsoluteIndicator(SBox sbox) {
+        
         int i, j, rows, columns;
-        int max = 0, temp = 0, temp2 = 0;
-
-        int m = sbox.getM();
-        int n = sbox.getN();
+        int max = 0, temp = 0, temp2 = 0, m = sbox.getM(), n = sbox.getN();
+        int components[];
+        int autocorrelationfast[][];
+        Representation representation = sbox.getRepresentation();
+        
         rows = 1 << m;
         columns = 1 << n - 1;
         
-        Representation representation = sbox.getRepresentation();
-        int autocorrelationfast[][] = representation.getAutocorrelationfast();
-        
-        int components[] = new int[columns];
+        autocorrelationfast = representation.getAutocorrelationfast();
+        components = new int[columns];
 
-        for (j = 0; j < columns; j++)
-        {
+        for (j = 0; j < columns; j++) {
+            
             temp = Math.abs(autocorrelationfast[1][j]); //disregard first value since it is 2^n
-            for (i = 2; i < rows; i++)	
-            {
+            
+            for (i = 2; i < rows; i++) {
+                
                 temp2 = Math.abs(autocorrelationfast[i][j]);
+            
                 if (temp2 > temp)
-                        temp = temp2;
+                    temp = temp2;
+            
             }
+            
             components[j] = temp;
+            
             if (temp > max)
                 max = temp;
+        
         }
+        
         return max;
+    
     }
     
-    public int calculateSumOfSquareIndicator (SBox sbox) //the smaller, the bettter
-    {
+    public int calculateSumOfSquareIndicator (SBox sbox) { //the smaller, the bettter
+        
         int i, j, rows, columns;
-        int max = 0, sum = 0;
-
-        int m = sbox.getM();
-        int n = sbox.getN();
+        int max = 0, sum = 0, m = sbox.getM(), n = sbox.getN();
+        int components[];
+        int autocorrelationfast[][];
+        Representation representation = sbox.getRepresentation();
         
         rows = 1 << m;
         columns = 1 << n - 1;
         
-        Representation representation = sbox.getRepresentation();
-        int autocorrelationfast[][] = representation.getAutocorrelationfast();
+        autocorrelationfast = representation.getAutocorrelationfast();
+        components = new int[columns];
         
-        int components[] = new int[columns];
-        
-        for (j = 0; j < columns; j++)
-        {
-            for (i = 0; i < rows; i++)	
-            {
+        for (j = 0; j < columns; j++) {
+            
+            for (i = 0; i < rows; i++)                 
                 sum += autocorrelationfast[i][j] * autocorrelationfast[i][j];
-            }
+
             components[j] = sum;
+
             if (sum > max)
                 max = sum;
+
             sum = 0;
+
         }
+
         return max;
+
     }
 
-    public int calculateAlgebraicDegree (SBox sbox)
-    {
-        int  tmp, weight, deg;
-        int i, j, rows, columns, max = 0;
-
-        Representation representation = sbox.getRepresentation();
-        int algebraicnormalform[][] = representation.getAlgebraicnormalform();
+    public int calculateAlgebraicDegree (SBox sbox) {
         
-        int m = sbox.getM();
-        int n = sbox.getN();
+        int i, j, rows, columns, tmp, weight, deg; 
+        int max = 0, m = sbox.getM(), n = sbox.getN();
+        int components[];
+        int algebraicnormalform[][];
+        Representation representation = sbox.getRepresentation();
+        algebraicnormalform = representation.getAlgebraicnormalform();
         
         rows = 1 << m;
         columns = 1 << n - 1;
         
-        int components[] = new int[columns];
+        components = new int[columns];
 
-        for (j = 0; j < columns; j++)
-        {
+        for (j = 0; j < columns; j++) {
+            
             if (algebraicnormalform[rows - 1][j] != 0)
                 deg = m;
-            else
-            {
-                for (deg = 0, i = 1; i < (rows - 1); ++i)
-                    if (algebraicnormalform[i][j] != 0) 
-                    {
+            else {
+                
+                for (deg = 0, i = 1; i < (rows - 1); ++i) {
+                    
+                    if (algebraicnormalform[i][j] != 0) {
+                        
                         for (weight = 0, tmp = i; tmp > 0; tmp >>= 1)
                             weight = weight + tmp%2;
+                        
                         if (weight > deg)
                             deg = weight;
+                    
                     }
+                
+                }
+            
             }
+            
             components[j] = deg;
+            
             if (components[j] > max)
                 max = components[j];
+        
         }
+        
         return max;
+    
     }
     
-    public int calculateAlgebraicImmunity(SBox sbox)//u8 **ll, uint *components)
-    {
+    public int calculateAlgebraicImmunity(SBox sbox) {//u8 **ll, uint *components)
         
-        int i, columns, rows, min = Integer.MAX_VALUE;
-
-        int n = sbox.getN();
-        int m = sbox.getM();
-        int hamming[] = sbox.getHammingweight();
-        
-        Representation representation = sbox.getRepresentation();
-        int algebraicnormalform[][] = representation.getAlgebraicnormalform();
-        
+        int a, b, deg, i, columns, rows, Nm; 
+        int res = 0, min = Integer.MAX_VALUE, n = sbox.getN(), m = sbox.getM();
+        int hamming[], components[], monomials[];
+        int algebraicnormalform[][];
         HelperFunctions helperfunction = new HelperFunctions();
+        Representation representation = sbox.getRepresentation();
+        
+        hamming = sbox.getHammingweight();
+        algebraicnormalform = representation.getAlgebraicnormalform();
         
         MAT m0 = new MAT();
         MAT m1 = new MAT();
-        
-        int a, b, res = 0, deg;
 
         rows = 1 << m;
         columns = (1 << n) - 1;
-        int components[] = new int[columns];
+
+        components = new int[columns];
 
         deg = (m >> 1) + (m & 1);
-        int monomials[] = calculateMonomials(m, deg, hamming);
-        int Nm = monomials.length;
+        monomials = calculateMonomials(m, deg, hamming);
+        Nm = monomials.length;
         
         monomials = helperfunction.sortIncreasingDeg(monomials, hamming);
 
-        for (i = 0; i < columns; i++)
-        {
+        for (i = 0; i < columns; i++) {
+            
             m0 = helperfunction.getMatrix(algebraicnormalform, m, m0, monomials, Nm, deg, 0);
+            
             if (m0 == null)
                 res = 0;
-            else 
-            {
+            
+            else {
+                
                 m1 = helperfunction.getMatrix(algebraicnormalform, m, m1, monomials, Nm, deg, 1);
                 a = helperfunction.solveMatrix(m0, hamming, monomials, 0);
                 b = helperfunction.solveMatrix(m1, hamming, monomials, 1);
                 res = (a < b) ? a : b;
+            
             }
+            
             components[i] = res;
+            
             if (res < min)
-                    min = res;
+                min = res;
+        
         }
 
-        return 0;//min;
+        return min;
     }    
     
     public int[] calculateMonomials (int n, int d, int hamming[])
@@ -524,6 +558,105 @@ public class Calculator {
         
         return robustness;
     }    
+    
+    
+    public float calculateTransparency (SBox sbox)
+    {
+        int N = sbox.getN();
+        int M = sbox.getM();
+        int nshift = 1 << N;
+        int mshift = 1 << M;
+        int hamming[] = sbox.getHammingweight();
+        int inputarray[] = sbox.getSbox();
+        int b, a, v, x, tmp = 0;
+        float res = 0;
+        float sigma1, sigma2, sigma3 = 0, C;
+        HelperFunctions helperfunctions = new HelperFunctions();
+
+        if (N > 1)
+            return calculateTransparencyFast (sbox);
+
+        C = (float) ((1 << (2 * M)) - mshift);
+
+        for (b = 0; b < nshift; b++)
+        {
+            sigma1 = 0;
+            for (a = 1; a < mshift; a++)
+            {
+                    sigma2 = 0;
+                    for (v = 1; v < nshift; v = v << 1) //can go from 1 since we need Hamming weight to be 1
+                    {
+                            sigma3 = 0;
+                            for (x = 0; x < mshift; x++)
+                            {
+                                    sigma3 += (float) (1 - 2 * helperfunctions.innerProduct(v, inputarray[x]^inputarray[x^a], M));
+                            }
+                            sigma2 += (float) (1 - 2 * helperfunctions.innerProduct(v, b, M)) * sigma3;
+                    }
+
+                    if (sigma2 < 0)
+                            sigma2 = sigma2 * (-1);
+
+                    sigma1 += sigma2;
+            }
+            //tmp = 2 * hamming_weight(b);
+            tmp = 2 * hamming[b];
+            if (res < Math.abs((int)N - tmp) - sigma1/C)
+                res = Math.abs((int)N - tmp) - sigma1/C;
+        }
+        return res;
+    }    
+    
+    public float calculateTransparencyFast(SBox sbox)
+    {
+            int tmp = 0;
+            int b, a, x;
+            int N = sbox.getN();
+            int M = sbox.getM();
+            int mshift = 1 << M;
+            int nshift = 1 << N;
+            int hamming[] = sbox.getHammingweight();
+            int inputarray[] = sbox.getSbox();
+            float res = 0, z = 0, temp = 0, sigma1 = 0, sigma2 = 0, treshold = 0;
+            float C = (float) ((1 << (2 * N)) - nshift);
+            float K = (float) (N * nshift);
+
+            for (b = 0; b < nshift; b++)
+            {
+                    treshold = (float) (N - 2 * hamming[b]);
+                    if (treshold < 0)
+                            treshold = treshold * (-1);
+                    treshold = (treshold - res) * C;
+                    if (treshold >= 0)
+                    {
+                            sigma2 = 0;
+                            for (a = 1; a < nshift; a++)
+                            {
+                                    sigma1 = 0;
+                                    for (x = 0; x < nshift; x++)
+                                    {
+                                            //sigma1 = sigma1 + hamming_weight(b ^ (evaluate_box(tt,x,a, N)));
+                                            //sigma1 = sigma1 + hamming[b ^ (evaluate_box(tt, x, a))];
+                                            sigma1 = sigma1 + hamming[b ^ (inputarray[x]^inputarray[x^a])];
+                                    }
+                                    z = K - 2 * sigma1;
+                                    if (sigma1 > treshold)
+                                            break;
+                                    temp = treshold - (sigma1/C);
+
+                                    if (z < 0)
+                                            z = z * (-1);
+                                    sigma2 += z;
+                            }
+                            //tmp = 2 * hamming_weight(b);
+                            tmp = 2 * hamming[b];
+                            if (res < Math.abs((int)N - tmp) - sigma2/C)
+                                    res = Math.abs((int)N - tmp) - sigma2/C;
+                    }
+            }
+            return res;
+    }    
+    
     
 }
 
