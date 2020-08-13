@@ -12,7 +12,6 @@ package Model;
 public class Calculator {
     
     public void calculateRepresentationSBox(SBox sbox) {
-        
         int n = sbox.getN();
         int m = sbox.getM();
         int input[] = sbox.getSbox();
@@ -26,11 +25,9 @@ public class Calculator {
         representation.calculateAutocorrelationFast();
         sbox.setRepresentation(representation);
         calculateHammingWeights(sbox);
-        
     }
     
     public int calculateNonLinearity (SBox sbox) {
-        
         int  i, j; 
         int rows, columns, mshift; 
         int temp = 0, min = Integer.MAX_VALUE;
@@ -66,11 +63,9 @@ public class Calculator {
 
         sbox.setNonlinearity(min);
         return min;
-
     }  
     
     public void calculateHammingWeights(SBox sbox) {
-        
         int m = sbox.getM();
         int mshift = 1 << m;
         int hamming[] = new int[mshift];
@@ -79,22 +74,18 @@ public class Calculator {
             hamming[i] = calculateHammingWeight(i);            
 
         sbox.setHammingweight(hamming);
-    
     }
     
     public int calculateHammingWeight(int x) {
-
         int res;
 
         for (res = 0; x > 0; x = x >> 1)
             res = res + (x & 0x01);
 
         return res;
-
     }
     
     public int calculateCorrelationImmunity(SBox sbox) {
-        
         int  i, j, columns, order, rows;
         int min = Integer.MAX_VALUE, m =  sbox.getM(), n = sbox.getN();
         int hamming[], components[];
@@ -128,7 +119,6 @@ public class Calculator {
     }    
     
     public int calculateAbsoluteIndicator(SBox sbox) {
-        
         int i, j, rows, columns;
         int max = 0, temp = 0, temp2 = 0, m = sbox.getM(), n = sbox.getN();
         int components[];
@@ -162,11 +152,9 @@ public class Calculator {
         }
         
         return max;
-    
     }
     
     public int calculateSumOfSquareIndicator (SBox sbox) { //the smaller, the bettter
-        
         int i, j, rows, columns;
         int max = 0, sum = 0, m = sbox.getM(), n = sbox.getN();
         int components[];
@@ -194,11 +182,9 @@ public class Calculator {
         }
 
         return max;
-
     }
 
     public int calculateAlgebraicDegree (SBox sbox) {
-        
         int i, j, rows, columns, tmp, weight, deg; 
         int max = 0, m = sbox.getM(), n = sbox.getN();
         int components[];
@@ -241,11 +227,9 @@ public class Calculator {
         }
         
         return max;
-    
     }
     
     public int calculateAlgebraicImmunity(SBox sbox) {//u8 **ll, uint *components)
-        
         int a, b, deg, i, columns, rows, Nm; 
         int res = 0, min = Integer.MAX_VALUE, n = sbox.getN(), m = sbox.getM();
         int hamming[], components[], monomials[];
@@ -296,23 +280,25 @@ public class Calculator {
         return min;
     }    
     
-    public int[] calculateMonomials (int n, int d, int hamming[])
-    {
+    public int[] calculateMonomials (int n, int d, int hamming[]) {
         int i, k, N;//Tenemos que devolver N mayuscula
         int res[]; //Tenemos que devolver res
         HelperFunctions helperfunctions = new HelperFunctions();
+        
         for (N = 0, k = 0; k <= d; ++k)
             N = N + helperfunctions.choose(n, k);
+        
         res = new int[N];
+        
         for (k = 0, i = 0; i<(1<<n); ++i)
             //if (hamming_weight(i) <= d)
             if (hamming[i] <= d)
                res[k++] = i;
+        
         return res;
     }    
     
-    public int calculatePropagationCharacteristics(SBox sbox) //the higher the better
-    {
+    public int calculatePropagationCharacteristics(SBox sbox) {//the higher the better{
         int i, j, z, order = 1, count = 0;
         int help[];
         int mshift = 1 << sbox.getM();
@@ -322,25 +308,25 @@ public class Calculator {
         
         help = new int[mshift];
 
-        do 
-        {
-            for (i = 1; i < mshift; i++)
-            {
+        do {
+            for (i = 1; i < mshift; i++) {
                 //if (order == hamming_weight(i))
-                if (order == hamming[i])
-                {
+                if (order == hamming[i]) {
+                    
                     calculateDerivative(inputarray, help, i, mshift);
-
                     //could be done with tt, wt, balance
-                    for (j = 0; j < mshift; j++)
-                    {
-                        for (z = 0; z < mshift; z++)
-                        {
+                    for (j = 0; j < mshift; j++) {
+                        
+                        for (z = 0; z < mshift; z++) {
+                            
                             if (help[z] == j)
                                 count++;
+                        
                         }
+                        
                         if (count != 1)
                             return order - 1;
+                        
                         count = 0;
                     }
                 }
@@ -350,108 +336,105 @@ public class Calculator {
         return order-1;
     }    
     
-    public void calculateDerivative (int input_array[], int output_array[], int shift, int columns)
-    {
+    public void calculateDerivative (int input_array[], int output_array[], int shift, int columns) {
+        
         int i;
+        
         for (i = 0; i < columns; i++)
-        {
             output_array[i] = input_array[i] ^ input_array[i ^ shift];
-        }
+    
     }
     
-    public int calculateNumFixedPoints (SBox sbox)
-    {
+    public int calculateNumFixedPoints (SBox sbox) {
+        
         int inputarray[] = sbox.getSbox();
         int i, res = 0, rows = 1 << sbox.getM();
 
-        for (i = 0; i < rows; i++)
-        {
-            if ((inputarray[i] ^ i) == 0)
-            {
-                res++;
-                //if (output)
-                    //System.out.println("Fixed point is %x on position %d.\n", inputarray[i], i);
-            }
+        for (i = 0; i < rows; i++) {
+            
+            if ((inputarray[i] ^ i) == 0) //if (output)
+                res++; //System.out.println("Fixed point is %x on position %d.\n", inputarray[i], i);
+
         }
         return res;
     }
     
-    public int calculateNumOppositeFixedPoints (SBox sbox)
-    {
+    public int calculateNumOppositeFixedPoints (SBox sbox) {
+        
         int i, res = 0, rows = 1 << sbox.getM();
         int inputarray[] = sbox.getSbox();
         
-        for (i = 0; i < rows; i++)
-        {
-            if (inputarray[i] == (~i & (rows - 1)))
-            {
-                res++;
-                //if (output)
-                    //printf("Opposite fixed point is %x on position %d.\n", input_array[i], i);
-            }
+        for (i = 0; i < rows; i++) {
+            
+            if (inputarray[i] == (~i & (rows - 1))) //if (output)
+                res++; //printf("Opposite fixed point is %x on position %d.\n", input_array[i], i);
+
         }
+
         return res;
+
     }    
     
     
-    public float calculateComputeKappaCPA(int inputBits, int outputBits, int keyBits, SBox sbox)
-    { 
-            int inputSize = 1 << inputBits;
-            int outputSize = 1 << outputBits;
-            int keySize = 1 << keyBits;
-            int coefficientSize = (keySize * (keySize-1)) >> 1; // combinatorics on key picks i and j
-            int confusionCounter = 0; //# of times we observe confusion
-            int outi,outj; // Sbox output	
-            int coefficientCounter = 0; //how many coefficients have we computed
-            int keyi, keyj, input, i = 0, j = 0, k = 0, coefficientSum = 0, temp = 0, fcounter = 0, in = 0;
-            float mean = 0, var = 0;
+    public float calculateComputeKappaCPA(int inputBits, int outputBits, int keyBits, SBox sbox) { 
+
+        int inputSize = 1 << inputBits;
+        int outputSize = 1 << outputBits;
+        int keySize = 1 << keyBits;
+        int coefficientSize = (keySize * (keySize-1)) >> 1; // combinatorics on key picks i and j
+        int confusionCounter = 0; //# of times we observe confusion
+        int outi,outj; // Sbox output	
+        int coefficientCounter = 0; //how many coefficients have we computed
+        int keyi, keyj, input, i = 0, j = 0, k = 0, coefficientSum = 0, temp = 0, fcounter = 0, in = 0;
+        float mean = 0, var = 0;
+
+        int inputarray[] = sbox.getSbox();
+        int hamming[] = sbox.getHammingweight();
+        //float reducedCoefficients[] = new float[coefficientSize];
+        //float frequency[] = new float[coefficientSize];
+        float confusionCharacteristic[] = new float[coefficientSize]; 
+
+        for (keyi = 0; keyi < keySize; keyi++) {
+
+            for (keyj = keyi + 1; keyj < keySize; keyj++) {
+                
+                for (input = 0; input < inputSize ; input++) {
+
+                    outi = inputarray[keyi ^ input];
+                    outj = inputarray[keyj ^ input];
+
+                    temp = hamming[outi] - hamming[outj]; 
+                    temp *=  temp;
+                    coefficientSum += temp;
+
+                }	
+                //input set is over, lets compute confusion coefficient for (keyi, keyj)
+                confusionCharacteristic[coefficientCounter]=(float)coefficientSum / (float)inputSize;
+                coefficientCounter ++;
+                confusionCounter = 0; //dpa
+                coefficientSum = 0; //cpa
             
-            int inputarray[] = sbox.getSbox();
-            int hamming[] = sbox.getHammingweight();
-            float reducedCoefficients[] = new float[coefficientSize];
-            float frequency[] = new float[coefficientSize];
-            float confusionCharacteristic[] = new float[coefficientSize]; 
-
-
-            for (keyi = 0; keyi < keySize; keyi++)
-            {
-                    for (keyj = keyi + 1; keyj < keySize; keyj++)
-                    {		
-                            for (input = 0; input < inputSize ; input++)
-                            {
-                                    outi = inputarray[keyi ^ input];
-                                    outj = inputarray[keyj ^ input];
-
-                                    temp = hamming[outi] - hamming[outj]; 
-                                    temp *=  temp;
-                                    coefficientSum += temp;
-                            }	
-                            //input set is over, lets compute confusion coefficient for (keyi, keyj)
-                            confusionCharacteristic[coefficientCounter]=(float)coefficientSum / (float)inputSize;
-                            coefficientCounter ++;
-                            confusionCounter = 0; //dpa
-                            coefficientSum = 0; //cpa
-                    }
             }
+        }
 
-            fcounter = 0;
-            for (i = 0; i < coefficientSize; i++)
-            {
-                    if(confusionCharacteristic[10] == confusionCharacteristic[i])
-                    {
-                            fcounter++;
-                    }
-                    mean = mean + confusionCharacteristic[i];
-            }
+        fcounter = 0;
+        for (i = 0; i < coefficientSize; i++)
+        {
+                if(confusionCharacteristic[10] == confusionCharacteristic[i])
+                {
+                        fcounter++;
+                }
+                mean = mean + confusionCharacteristic[i];
+        }
 
-            mean = mean / (float)coefficientSize;
+        mean = mean / (float)coefficientSize;
 
-            for (i = 0; i < coefficientSize; i++)
-                    var = (float) (var + (float) Math.pow((confusionCharacteristic[i] - (float) mean), 2));
+        for (i = 0; i < coefficientSize; i++)
+                var = (float) (var + (float) Math.pow((confusionCharacteristic[i] - (float) mean), 2));
 
-            var = var / (float)coefficientSize;
+        var = var / (float)coefficientSize;
 
-            return var;
+        return var;
     }    
     
     public float calculateSNR_DPA (SBox sbox)
